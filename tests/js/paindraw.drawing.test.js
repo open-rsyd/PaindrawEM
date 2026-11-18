@@ -264,13 +264,8 @@ describe('download button', () => {
   });
 });
 
-describe('known limitations', () => {
-  // Releasing the mouse button outside the canvas never ends the stroke,
-  // because mouseup is only listened for on the canvas element. The stroke is
-  // then not stored and the next mouse movement keeps painting.
-  // `it.fails` keeps this suite green today and starts failing, as a reminder
-  // to remove `.fails`, once the script is fixed.
-  it.fails('ends and stores a stroke when the button is released outside the canvas', async () => {
+describe('releasing the mouse button outside the canvas', () => {
+  it('ends and stores the stroke', async () => {
     const env = await loadReady();
 
     mouse(env.canvas, 'mousedown', 60, 70);
@@ -278,5 +273,28 @@ describe('known limitations', () => {
     document.body.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
 
     expect(env.strokes()).toHaveLength(1);
+    expect(env.strokes()[0].p).toEqual([[100, 100], [120, 100]]);
+    expect(env.pngInput.value).toBe(TEST_PNG);
+  });
+
+  it('does not keep painting when the pointer returns to the canvas', async () => {
+    const env = await loadReady();
+    mouse(env.canvas, 'mousedown', 60, 70);
+    document.body.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    const painted = env.ctx.fillRect.mock.calls.length;
+
+    mouse(env.canvas, 'mousemove', 70, 70);
+
+    expect(env.ctx.fillRect.mock.calls.length).toBe(painted);
+  });
+
+  it('stores a normal stroke only once, although mouseup also reaches the document', async () => {
+    const env = await loadReady();
+
+    mouse(env.canvas, 'mousedown', 60, 70);
+    mouse(env.canvas, 'mouseup', 60, 70);
+
+    expect(env.strokes()).toHaveLength(1);
+    expect(globalThis.setDataEntryFormValuesChanged).toHaveBeenCalledTimes(1);
   });
 });
