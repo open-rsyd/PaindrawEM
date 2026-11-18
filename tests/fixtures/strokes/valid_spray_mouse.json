@@ -1,0 +1,15 @@
+[
+  {
+    "strokeId": 1,
+    "drawInputType": "mouse",
+    "tool": "spray",
+    "color": "#fc3d03",
+    "lineWidth": 3,
+    "sprayDensity": 15,
+    "sprayRadius": 5,
+    "alpha": 0.1,
+    "scaleFactor": 0.5,
+    "dpr": 2,
+    "p": [[10, 20], [12, 22], [15, 25]]
+  }
+]

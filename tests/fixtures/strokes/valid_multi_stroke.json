@@ -1,0 +1,28 @@
+[
+  {
+    "strokeId": 1,
+    "drawInputType": "mouse",
+    "tool": "spray",
+    "color": "#fc3d03",
+    "lineWidth": 3,
+    "sprayDensity": 15,
+    "sprayRadius": 5,
+    "alpha": 0.1,
+    "scaleFactor": 0.8542713567839196,
+    "dpr": 1,
+    "p": [[0, 0], [1, 1]]
+  },
+  {
+    "strokeId": 2,
+    "drawInputType": "mouse",
+    "tool": "spray",
+    "color": "#fc3d03",
+    "lineWidth": 3,
+    "sprayDensity": 15,
+    "sprayRadius": 5,
+    "alpha": 0.1,
+    "scaleFactor": 0.8542713567839196,
+    "dpr": 1,
+    "p": [[300, 400]]
+  }
+]
