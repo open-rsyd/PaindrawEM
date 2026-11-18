@@ -1,0 +1,15 @@
+{
+  "name": "paindraw-em-tests",
+  "private": true,
+  "description": "JavaScript test tooling for the PainDraw REDCap external module (not part of the module itself)",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "jquery": "^3.7.1",
+    "jsdom": "^26.1.0",
+    "vitest": "^5.1.0"
+  }
+}
