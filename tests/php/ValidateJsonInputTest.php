@@ -193,13 +193,12 @@ class ValidateJsonInputTest extends PainDrawTestCase
         ]));
     }
 
-    // --------------------------------------------------------- known bugs (opt-in)
+    // --------------------------------------------------------- regression tests for fixed bugs
 
     /**
      * PainDraw.php line ~342 checks $d['scaleFactor'] instead of $d['dpr'], so
      * the dpr value is never validated.
      */
-    #[Group('known-bug')]
     public function testDprIsValidatedOnItsOwnValue(): void
     {
         $this->expectException(\ValidationException::class);
@@ -210,7 +209,6 @@ class ValidateJsonInputTest extends PainDrawTestCase
      * The colour pattern ends in "$", which in PCRE also matches before a
      * trailing newline, so "#fc3d03\n" is accepted and stored.
      */
-    #[Group('known-bug')]
     public function testColourWithTrailingNewlineIsRejected(): void
     {
         $this->expectException(\ValidationException::class);

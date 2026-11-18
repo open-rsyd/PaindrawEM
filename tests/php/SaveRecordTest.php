@@ -254,13 +254,12 @@ class SaveRecordTest extends PainDrawTestCase
         $this->assertStringStartsWith("\x89PNG", \REDCap::$stored[1]['content']);
     }
 
-    // --------------------------------------------------------- known bugs (opt-in)
+    // --------------------------------------------------------- regression tests for fixed bugs
 
     /**
      * README: id = PID<Project>-R<Record>-F<CanvasField>-E<Event>-I<Instance>.
      * The code builds "...-R{record}F-{field}-..." (misplaced hyphen).
      */
-    #[Group('known-bug')]
     public function testDrawingIdFollowsTheFormatInTheReadme(): void
     {
         $this->postStrokes([self::validStroke()]);
@@ -275,7 +274,6 @@ class SaveRecordTest extends PainDrawTestCase
      * array_key_exists('img_url', $cfg) is still true, so a crafted POST is
      * stored with null width/height/template.
      */
-    #[Group('known-bug')]
     public function testNothingIsStoredForACanvasWithAnUnsupportedImage(): void
     {
         $this->postStrokes([self::validStroke()]);
@@ -289,7 +287,6 @@ class SaveRecordTest extends PainDrawTestCase
      * $_POST['paindraw_stored_png'] is read without isset(); when the field is
      * missing PHP raises "Undefined array key".
      */
-    #[Group('known-bug')]
     public function testMissingPngFieldDoesNotRaiseWarnings(): void
     {
         $this->postStrokes([self::validStroke()]);
@@ -306,7 +303,6 @@ class SaveRecordTest extends PainDrawTestCase
      * An undecodable PNG payload throws a plain \Exception from inside the
      * save hook, which would abort the user's save in REDCap.
      */
-    #[Group('known-bug')]
     public function testUndecodablePngDoesNotThrowFromTheSaveHook(): void
     {
         $this->postStrokes([self::validStroke()]);
@@ -322,7 +318,6 @@ class SaveRecordTest extends PainDrawTestCase
      * Valid JSON that is not a list (a number, string, true, null) is passed
      * to validateJsonInput(array $data) and causes an uncaught TypeError.
      */
-    #[Group('known-bug')]
     #[DataProvider('scalarJsonProvider')]
     public function testScalarJsonDoesNotBreakTheSaveHook(string $payload): void
     {

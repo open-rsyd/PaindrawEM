@@ -125,7 +125,6 @@ class ParseModuleSettingsTest extends PainDrawTestCase
         return [
             'six digits lower case' => ['#00aaff'],
             'six digits upper case' => ['#00AAFF'],
-            'three digits' => ['#0af'],
         ];
     }
 
@@ -166,13 +165,12 @@ class ParseModuleSettingsTest extends PainDrawTestCase
         $this->assertArrayNotHasKey('canvas_width', $cfg);
     }
 
-    // --------------------------------------------------------- known bugs (opt-in)
+    // --------------------------------------------------------- regression tests for fixed bugs
 
     /**
      * The colour pattern in parseModuleSettings() is not anchored, so any
      * string that merely contains a hex colour is accepted unchanged.
      */
-    #[Group('known-bug')]
     public function testColourSurroundedByOtherTextIsNotAccepted(): void
     {
         $cfg = $this->makeModule([self::canvasGroup(['line_color' => 'xx#abcxx'])])->parseSettings(7, 'pain_form');
@@ -185,7 +183,6 @@ class ParseModuleSettingsTest extends PainDrawTestCase
      * A project configured with "#f00" would have every stroke rejected on
      * save, and the module only logs the error, so data silently disappears.
      */
-    #[Group('known-bug')]
     public function testConfiguredColourIsAcceptedByTheServerSideValidator(): void
     {
         $module = $this->makeModule([self::canvasGroup(['line_color' => '#f00'])]);

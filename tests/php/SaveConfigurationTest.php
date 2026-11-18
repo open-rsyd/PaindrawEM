@@ -142,7 +142,7 @@ class SaveConfigurationTest extends PainDrawTestCase
         $this->assertSame('', $saved['canvas_width'][1]);
     }
 
-    // --------------------------------------------------------- known bugs (opt-in)
+    // ---------------------------------------------------- regression tests for fixed bugs
 
     /**
      * A file with an image MIME type whose content cannot be decoded makes
@@ -150,7 +150,6 @@ class SaveConfigurationTest extends PainDrawTestCase
      * offsets from false and ends up with blank dimensions, instead of
      * reporting a format error.
      */
-    #[Group('known-bug')]
     public function testUndecodableImageIsReportedAsFormatError(): void
     {
         $this->withWarningsAsExceptions(function (): void {
