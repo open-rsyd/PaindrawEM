@@ -150,6 +150,7 @@ class ValidateJsonInputTest extends PainDrawTestCase
 
             // integers
             'negative strokeId' => [['strokeId' => -1], []],
+            'zero strokeId (stroke_id starts at 1)' => [['strokeId' => 0], []],
             'fractional strokeId' => [['strokeId' => 1.5], []],
             'text strokeId' => [['strokeId' => 'one'], []],
             'negative lineWidth' => [['lineWidth' => -3], []],
@@ -166,6 +167,10 @@ class ValidateJsonInputTest extends PainDrawTestCase
             // scaleFactor
             'negative scaleFactor' => [['scaleFactor' => -1], []],
             'text scaleFactor' => [['scaleFactor' => 'abc'], []],
+            'zero scaleFactor' => [['scaleFactor' => 0], []],
+            'zero scaleFactor as decimal' => [['scaleFactor' => 0.0], []],
+            'zero dpr' => [['dpr' => 0], []],
+            'negative dpr' => [['dpr' => -1], []],
 
             // points
             'points not an array' => [['p' => 'x'], []],
@@ -213,5 +218,27 @@ class ValidateJsonInputTest extends PainDrawTestCase
     {
         $this->expectException(\ValidationException::class);
         $this->makeModule()->validate(self::viaJson([self::validStroke(['color' => "#fc3d03\n"])]));
+    }
+
+    // ------------------------------------------------------- shape of the stored points
+
+    public function testPointsAreReturnedAsAPlainListEvenWhenTheClientSendsKeys(): void
+    {
+        $stroke = self::validStroke();
+        $stroke['p'] = ['first' => [1 => 5, 0 => 3], 'second' => [0 => 7, 1 => 9]];
+
+        $result = $this->makeModule()->validate([$stroke]);
+
+        $this->assertSame([[3, 5], [7, 9]], $result[0]['p']);
+        $this->assertSame('[[3,5],[7,9]]', json_encode($result[0]['p']));
+    }
+
+    public function testAPointWithoutTheKeysZeroAndOneIsRejected(): void
+    {
+        $stroke = self::validStroke();
+        $stroke['p'] = [['x' => 1, 'y' => 2]];
+
+        $this->expectException(\ValidationException::class);
+        $this->makeModule()->validate([$stroke]);
     }
 }

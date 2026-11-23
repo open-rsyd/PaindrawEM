@@ -112,29 +112,34 @@ class SaveRecordTest extends PainDrawTestCase
             'canvas_width' => '640',
             'canvas_height' => '480',
             'image_file_name' => 'front.png',
-            'image_md5' => 'abc123',
+            'image_md5' => '0123456789abcdef0123456789abcdef',
         ])]);
 
         $this->saveRecord($module);
 
         $doc = $this->storedJson();
         $this->assertSame(
-            ['v', 'id', 'w', 'h', 'units', 'tpl', 'tpl_md5', 'view', 'app', 'ts', 'crc', 's'],
+            ['schema_version', 'module_version', 'app', 'drawing_id', 'timestamp', 'width', 'height', 'units', 'template_file', 'template_md5', 'strokes'],
             array_keys($doc)
         );
-        $this->assertSame('paindraw_v0.3', $doc['v']);
-        $this->assertMatchesRegularExpression('/^PID7-R5/', $doc['id']);
-        $this->assertSame(640, $doc['w']);
-        $this->assertSame(480, $doc['h']);
+        $this->assertSame('1.0', $doc['schema_version']);
+        $this->assertSame('1.0.0', $doc['module_version']);
+        $this->assertSame('paindrawEM', $doc['app']);
+        $this->assertMatchesRegularExpression('/^PID7-R5/', $doc['drawing_id']);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $doc['timestamp']);
+        $this->assertSame(640, $doc['width']);
+        $this->assertSame(480, $doc['height']);
         $this->assertSame('px', $doc['units']);
-        $this->assertSame('front.png', $doc['tpl']);
-        $this->assertSame('abc123', $doc['tpl_md5']);
-        $this->assertNull($doc['view']);
-        $this->assertSame('PainDraw EM', $doc['app']);
-        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $doc['ts']);
-        $this->assertNull($doc['crc']);
-        $this->assertSame([1, 2], array_column($doc['s'], 'strokeId'));
-        $this->assertSame(['spray', 'pen'], array_column($doc['s'], 'tool'));
+        $this->assertSame('front.png', $doc['template_file']);
+        $this->assertSame('0123456789abcdef0123456789abcdef', $doc['template_md5']);
+        $this->assertSame([1, 2], array_column($doc['strokes'], 'stroke_id'));
+        $this->assertSame(['spray', 'pen'], array_column($doc['strokes'], 'tool'));
+        $this->assertSame(
+            ['stroke_id', 'draw_input_type', 'tool', 'color', 'line_width', 'spray_density', 'spray_radius', 'alpha', 'scale_factor', 'device_pixel_ratio', 'points'],
+            array_keys($doc['strokes'][0])
+        );
+        $this->assertSame([[10, 20], [11, 21]], $doc['strokes'][0]['points']);
+        $this->assertNull($doc['strokes'][1]['spray_density']); // pen stroke
     }
 
     public function testFileNameIsTheDrawingIdAndTheFileEndsWithCrLf(): void
@@ -144,7 +149,7 @@ class SaveRecordTest extends PainDrawTestCase
         $this->saveRecord($this->makeModule([self::canvasGroup()]));
 
         $doc = $this->storedJson();
-        $this->assertSame($doc['id'] . '.json', \REDCap::$stored[0]['name']);
+        $this->assertSame($doc['drawing_id'] . '.json', \REDCap::$stored[0]['name']);
         $this->assertStringEndsWith("\r\n", \REDCap::$stored[0]['content']);
     }
 
@@ -163,7 +168,7 @@ class SaveRecordTest extends PainDrawTestCase
 
         $this->saveRecord($this->makeModule([self::canvasGroup()]));
 
-        $this->assertArrayNotHasKey('evil', $this->storedJson()['s'][0]);
+        $this->assertArrayNotHasKey('evil', $this->storedJson()['strokes'][0]);
     }
 
     public function testLogsAnErrorWhenREDCapCannotStoreTheFile(): void
@@ -204,7 +209,7 @@ class SaveRecordTest extends PainDrawTestCase
 
         $this->saveRecord($this->makeModule([self::canvasGroup(['image_store_field' => 'pain_png'])]));
 
-        $id = $this->storedJson()['id'];
+        $id = $this->storedJson()['drawing_id'];
         $this->assertSame($id . '.png', \REDCap::$stored[1]['name']);
     }
 
@@ -266,7 +271,7 @@ class SaveRecordTest extends PainDrawTestCase
 
         $this->saveRecord($this->makeModule([self::canvasGroup()]));
 
-        $this->assertSame('PID7-R5-Fpain_draw-E3-I1', $this->storedJson()['id']);
+        $this->assertSame('PID7-R5-Fpain_draw-E3-I1', $this->storedJson()['drawing_id']);
     }
 
     /**
@@ -337,5 +342,109 @@ class SaveRecordTest extends PainDrawTestCase
             'true' => ['true'],
             'null' => ['null'],
         ];
+    }
+
+    // ----------------------------------------------------- JSON schema 1.0 requirements
+
+    #[DataProvider('moduleDirectoryProvider')]
+    public function testModuleVersionComesFromTheModuleDirectoryName(string $directory, string $expected): void
+    {
+        $this->postStrokes([self::validStroke()]);
+        $module = $this->makeModule([self::canvasGroup()]);
+        $module->directoryName = $directory;
+
+        $this->saveRecord($module);
+
+        $this->assertSame($expected, $this->storedJson()['module_version']);
+    }
+
+    public static function moduleDirectoryProvider(): array
+    {
+        return [
+            'three parts' => ['paindraw_v2.3.4', '2.3.4'],
+            'two parts get a zero patch number' => ['paindraw_v1.2', '1.2.0'],
+            'two digit parts' => ['paindraw_v0.10.12', '0.10.12'],
+        ];
+    }
+
+    #[DataProvider('unreadableDirectoryProvider')]
+    public function testNothingIsStoredWhenTheModuleVersionCannotBeRead(string $directory): void
+    {
+        $this->postStrokes([self::validStroke()]);
+        $module = $this->makeModule([self::canvasGroup()]);
+        $module->directoryName = $directory;
+
+        $this->saveRecord($module);
+
+        $this->assertSame([], \REDCap::$stored);
+        $this->assertStringContainsString('Cannot read the module version', $this->loggedErrors());
+    }
+
+    public static function unreadableDirectoryProvider(): array
+    {
+        return [
+            'no version' => ['paindraw'],
+            'one part' => ['paindraw_v1'],
+            'pre-release suffix' => ['paindraw_v1.0.0-beta'],
+            'four parts' => ['paindraw_v1.0.0.1'],
+        ];
+    }
+
+    /** @param array<string, mixed> $overrides */
+    #[DataProvider('incompleteTemplateProvider')]
+    public function testNothingIsStoredWhenTheBackgroundImageInformationIsIncomplete(array $overrides): void
+    {
+        $this->postStrokes([self::validStroke()]);
+
+        $this->saveRecord($this->makeModule([self::canvasGroup($overrides)]));
+
+        $this->assertSame([], \REDCap::$stored);
+        $this->assertStringContainsString('does not match JSON schema 1.0', $this->loggedErrors());
+    }
+
+    public static function incompleteTemplateProvider(): array
+    {
+        return [
+            'no checksum' => [['image_md5' => null]],
+            'empty checksum' => [['image_md5' => '']],
+            'checksum too short' => [['image_md5' => 'abc123']],
+            'checksum in upper case' => [['image_md5' => '0123456789ABCDEF0123456789ABCDEF']],
+            'no file name' => [['image_file_name' => null]],
+            'empty file name' => [['image_file_name' => '']],
+        ];
+    }
+
+    public function testNothingIsStoredWhenTwoStrokesShareAnId(): void
+    {
+        $this->postStrokes([self::validStroke(['strokeId' => 1]), self::validStroke(['strokeId' => 1, 'tool' => 'pen'])]);
+
+        $this->saveRecord($this->makeModule([self::canvasGroup()]));
+
+        $this->assertSame([], \REDCap::$stored);
+        $this->assertStringContainsString('stroke_id must be unique', $this->loggedErrors());
+    }
+
+    public function testADrawingWithoutStrokesIsNotSaved(): void
+    {
+        $_POST['paindraw_stored_strokes'] = '[]';
+
+        $this->saveRecord($this->makeModule([self::canvasGroup()]));
+
+        $this->assertSame([], \REDCap::$stored);
+        $this->assertSame([], \REDCap::$linked);
+    }
+
+    public function testEveryStoredNumberKeepsItsJsonType(): void
+    {
+        // The schema wants integers for ids, sizes and coordinates (a float such as 400.5 is not valid).
+        $this->postStrokes([self::validStroke(['alpha' => 1, 'scaleFactor' => 1, 'dpr' => 2])]);
+
+        $this->saveRecord($this->makeModule([self::canvasGroup()]));
+
+        $json = \REDCap::$stored[0]['content'];
+        $this->assertMatchesRegularExpression('/"width":400,/', $json);
+        $this->assertMatchesRegularExpression('/"height":300,/', $json);
+        $this->assertMatchesRegularExpression('/"stroke_id":1,/', $json);
+        $this->assertMatchesRegularExpression('/"points":\[\[10,20\],\[11,21\]\]/', $json);
     }
 }

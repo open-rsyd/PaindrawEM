@@ -46,7 +46,7 @@ class HooksOutputTest extends PainDrawTestCase
         $this->assertStringNotContainsString('&s=', $cfg['img_url']);
 
         $this->assertStringContainsString(
-            '<script src="https://example.test/modules/paindraw_v0.3/js/paindraw.js"></script>',
+            '<script src="https://example.test/modules/paindraw_v1.0.0/js/paindraw.js"></script>',
             $html
         );
         $this->assertStringContainsString('paindraw = ExternalModules.Modules.PainDraw', $html);

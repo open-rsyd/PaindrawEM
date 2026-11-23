@@ -140,24 +140,28 @@ On record save (data entry or survey submission), the module:
    - Correct data types and ranges.
    - Valid colors (HEX) and numeric parameters.
    - Valid coordinate pairs for strokes.
-3. Constructs a JSON object with metadata, including (simplified):
+3. Constructs a JSON document that follows [JSON schema 1.0](schema/paindraw_schema_1.0.json) (simplified):
 
 ```json
 {
-  "v": "PainDraw module version",
-  "id": "PID<Project>-R<Record>-F<CanvasField>-E<Event>-I<Instance>",
-  "w": <canvas_width>,
-  "h": <canvas_height>,
+  "schema_version": "1.0",
+  "module_version": "<x.y.z, from the module directory name>",
+  "app": "paindrawEM",
+  "drawing_id": "PID<Project>-R<Record>-F<CanvasField>-E<Event>-I<Instance>",
+  "timestamp": "<UTC, YYYY-MM-DDTHH:MM:SSZ>",
+  "width": <canvas_width>,
+  "height": <canvas_height>,
   "units": "px",
-  "tpl": "<template_file_name>",
-  "tpl_md5": "<template_md5>",
-  "view": null,
-  "app": "PainDraw EM",
-  "ts": "<UTC timestamp in ISO 8601>",
-  "crc": null,
-  "s": [ /* validated stroke data */ ]
+  "template_file": "<template_file_name>",
+  "template_md5": "<32 hex characters>",
+  "strokes": [ /* validated stroke data: stroke_id, draw_input_type, tool, color, line_width,
+                  spray_density, spray_radius, alpha, scale_factor, device_pixel_ratio, points */ ]
 }
 ```
+
+   The document is checked against the schema's rules before it is written. If it does not conform
+   (for example the module directory name has no `_vX.Y.Z` version, the template image has no checksum,
+   or there are no strokes), nothing is saved and an error is written to the PHP error log.
 
 4. Writes this JSON to a temporary file and stores it using REDCap::storeFile(...).
 5. Links the stored file to the canvas field as a file upload entry.

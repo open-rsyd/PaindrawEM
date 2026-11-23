@@ -24,6 +24,9 @@ abstract class AbstractExternalModule
 
     public bool $jsModuleInitialised = false;
 
+    /** Name of the module directory, from which the module takes its version. */
+    public string $directoryName = 'paindraw_v1.0.0';
+
     public object $framework;
 
     public function __construct()
@@ -53,12 +56,12 @@ abstract class AbstractExternalModule
 
     public function getUrl($path)
     {
-        return 'https://example.test/modules/paindraw_v0.3/' . $path;
+        return 'https://example.test/modules/' . $this->directoryName . '/' . $path;
     }
 
     public function getModuleDirectoryName()
     {
-        return 'paindraw_v0.3';
+        return $this->directoryName;
     }
 
     public function initializeJavascriptModuleObject()

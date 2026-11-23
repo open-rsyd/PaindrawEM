@@ -23,4 +23,5 @@ require_once __DIR__ . '/../../PainDraw.php';
 
 require_once __DIR__ . '/Support/TestablePainDraw.php';
 require_once __DIR__ . '/Support/TestImages.php';
+require_once __DIR__ . '/Support/JsonSchemaSubset.php';
 require_once __DIR__ . '/Support/PainDrawTestCase.php';

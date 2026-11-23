@@ -22,6 +22,11 @@ class TestablePainDraw extends PainDraw
         return $this->parseModuleSettings($projectId, $instrument);
     }
 
+    public function validateDocument(array $document): void
+    {
+        $this->validateDrawingDocument($document);
+    }
+
     public function iMagickInstalled(): bool
     {
         return $this->imagickAvailable;
