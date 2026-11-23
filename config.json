@@ -13,11 +13,6 @@
 		}
 	],
 	
-	"versions": [
-		{
-			"0.3": "Beta-version. Renamed module from PainSketch to PainDraw. Minor changes to data model (json)."
-		}
-	],
 	"framework-version": 16,
 	"project-settings": [
 		{

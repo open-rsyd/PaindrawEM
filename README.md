@@ -36,6 +36,10 @@ The JSON output is designed to be analysed using the **PainDrawR** package in R.
 ## 3. Installation
 
 1. Copy the PainDraw module files to your REDCap external modules directory, following standard REDCap conventions.
+   The directory name must end with the module version, for example `paindraw_v1.0.0`. When installing from a
+   GitHub download, rename the extracted folder accordingly. The version is not stored anywhere else in the code:
+   it is read from the directory name and written to every saved drawing (`module_version`). Drawings are not
+   saved if the directory name has no version.
 2. Enable the module at the **system level** in REDCap (Control Center → External Modules).
 3. Enable PainDraw for the specific project(s) where you want to use it (Project Setup → External Modules → Enable PainDraw).
 
