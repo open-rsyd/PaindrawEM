@@ -4,7 +4,7 @@ $(document).ready(function(){
   $('head').append(`
     <style>
       .paindraw-canvas {
-        border: 1px solid black;
+        outline: 1px solid black;
         touch-action: none;
         max-width: 100%;
         height: auto;
