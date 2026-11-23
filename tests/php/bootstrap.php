@@ -19,8 +19,9 @@ require_once __DIR__ . '/stubs/AbstractExternalModule.php';
 require_once __DIR__ . '/stubs/REDCap.php';
 require_once __DIR__ . '/stubs/Files.php';
 
-require_once __DIR__ . '/../../PainDraw.php';
+require_once __DIR__ . '/../../PaindrawEM.php';
 
 require_once __DIR__ . '/Support/TestablePainDraw.php';
 require_once __DIR__ . '/Support/TestImages.php';
+require_once __DIR__ . '/Support/JsonSchemaSubset.php';
 require_once __DIR__ . '/Support/PainDrawTestCase.php';

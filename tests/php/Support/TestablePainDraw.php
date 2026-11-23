@@ -1,14 +1,14 @@
 <?php
 
-namespace OPEN\PainDraw\Tests\Support;
+namespace OPEN\PaindrawEM\Tests\Support;
 
-use OPEN\PainDraw\PainDraw;
+use OPEN\PaindrawEM\PaindrawEM;
 
 /**
  * Exposes the module's protected methods and makes the Imagick check
  * controllable, so tests behave the same on every machine.
  */
-class TestablePainDraw extends PainDraw
+class TestablePainDraw extends PaindrawEM
 {
     public bool $imagickAvailable = false;
 
@@ -20,6 +20,11 @@ class TestablePainDraw extends PainDraw
     public function parseSettings(int|string $projectId, ?string $instrument = null): array
     {
         return $this->parseModuleSettings($projectId, $instrument);
+    }
+
+    public function validateDocument(array $document): void
+    {
+        $this->validateDrawingDocument($document);
     }
 
     public function iMagickInstalled(): bool

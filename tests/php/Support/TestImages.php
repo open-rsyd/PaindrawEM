@@ -1,6 +1,6 @@
 <?php
 
-namespace OPEN\PainDraw\Tests\Support;
+namespace OPEN\PaindrawEM\Tests\Support;
 
 /**
  * Small image fixtures generated in code, so no binary files are needed.

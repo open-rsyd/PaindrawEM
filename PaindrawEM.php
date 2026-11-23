@@ -1,11 +1,11 @@
 <?php
 
-namespace OPEN\PainDraw ;
+namespace OPEN\PaindrawEM ;
 
 use REDCap ;
 use Files ;
 
-class PainDraw extends \ExternalModules\AbstractExternalModule {
+class PaindrawEM extends \ExternalModules\AbstractExternalModule {
     
 	private ?string $_survey_hash=Null ;
 
@@ -16,6 +16,12 @@ class PainDraw extends \ExternalModules\AbstractExternalModule {
 		'image/avif',
 		'image/bmp',
 	];
+
+	/** Version of the JSON format written to the canvas field, see schema/paindraw_schema_1.0.json */
+	private const SCHEMA_VERSION = '1.0' ;
+
+	/** Value of "app" in the JSON files written by this module */
+	private const APP_NAME = 'paindrawEM' ;
 
 	function redcap_data_entry_form(int $project_id, ?string $record, string $instrument): void 
 	{
@@ -71,6 +77,11 @@ class PainDraw extends \ExternalModules\AbstractExternalModule {
 			return ;
 		}
 
+		if( $validated_strokes === [] ) {
+			// A drawing without strokes is not saved
+			return ;
+		}
+
 		$cfg = $this->parseModuleSettings($project_id, $instrument ) ;
 		
 		if( empty($cfg['img_url']) ) {
@@ -80,20 +91,13 @@ class PainDraw extends \ExternalModules\AbstractExternalModule {
 		$unique_drawing_id = "PID{$project_id}-R{$record}-F{$cfg['canvas_field']}-E{$event_id}-I{$repeat_instance}" ;
 		$paindraw_version = $this->getModuleDirectoryName() ;
 
-		$paindraw_data = array(
-			"v" => $paindraw_version, #Henviser til version af eksternt modul
-			"id" => $unique_drawing_id, # unikt id for hver tegning - kan også bruges som filnavn måske
-			"w" => $cfg['canvas_width'],
-			"h" => $cfg['canvas_height'],
-			"units" => "px",
-			"tpl" => $cfg['tpl'],
-			"tpl_md5" => $cfg['tpl_md5'],
-			"view" => NULL, # Angivelse af visning (A=Anterior, P=Posterior, L=Venstre, R=Højre)
-			"app" => "PainDraw EM",
-			"ts" => gmdate("Y-m-d\TH:i:s\Z"),
-			"crc" => NULL, # Ukendt parrameter
-			"s" => $validated_strokes,
-		) ;
+		try {
+			$paindraw_data = $this->buildDrawingDocument($unique_drawing_id, $cfg, $validated_strokes) ;
+			$this->validateDrawingDocument($paindraw_data) ;
+		} catch (\ValidationException $e) {
+			error_log("ERROR - PainDraw REDCap external module: Drawing does not match JSON schema " . self::SCHEMA_VERSION . ". Data not saved. " . $e->getMessage() ) ;
+			return ;
+		}
 
 		$tmp = tmpfile() ; 
 		fwrite($tmp, json_encode($paindraw_data, true ) . "\r\n" ) ;
@@ -258,7 +262,7 @@ class PainDraw extends \ExternalModules\AbstractExternalModule {
 
 			$v = array() ;
 
-			if( ! isset($d['strokeId']) || ! $matches($d['strokeId'], '/^\d+$/D' ) ) {
+			if( ! isset($d['strokeId']) || ! $matches($d['strokeId'], '/^[1-9][0-9]*$/D' ) ) {
 				throw $invalid() ;
 			} 
 			$v['strokeId'] = (int)$d['strokeId'] ;
@@ -303,12 +307,12 @@ class PainDraw extends \ExternalModules\AbstractExternalModule {
  			}
 			$v['alpha'] = (float)$d['alpha'] ;
 
-			if( ! isset($d['scaleFactor']) || ! $matches($d['scaleFactor'], '/^[0-9]+(\.[0-9]+)?$/D') ) {
+			if( ! isset($d['scaleFactor']) || ! $matches($d['scaleFactor'], '/^[0-9]+(\.[0-9]+)?$/D') || (float)$d['scaleFactor'] <= 0 ) {
 				throw $invalid() ;
  			}
 			$v['scaleFactor'] = (float)$d['scaleFactor'] ;
 
-			if( ! isset($d['dpr']) || ! $matches($d['dpr'], '/^[0-9]+(\.[0-9]+)?$/D') ) {
+			if( ! isset($d['dpr']) || ! $matches($d['dpr'], '/^[0-9]+(\.[0-9]+)?$/D') || (float)$d['dpr'] <= 0 ) {
 				throw $invalid() ;
  			}
 			$v['dpr'] = (float)$d['dpr'] ;
@@ -317,20 +321,25 @@ class PainDraw extends \ExternalModules\AbstractExternalModule {
 				throw $invalid() ;
 			}
 
+			// Rebuilt as a plain list of [x, y] pairs, so the stored JSON always holds arrays
+			$points = [] ;
+
 			foreach( $d['p'] as $pair ) {
-				
-				if ( ! is_array($pair) || count($pair) !== 2) {
-						throw $invalid() ;
-					}
+
+				if ( ! is_array($pair) || count($pair) !== 2 || ! array_key_exists(0, $pair) || ! array_key_exists(1, $pair) ) {
+					throw $invalid() ;
+				}
 
 				[$x, $y] = $pair;
 
 				if ( ! is_int($x) || ! is_int($y) ) {
 					throw $invalid();
 				}
+
+				$points[] = [$x, $y] ;
 			}
 
-			$v['p'] = $d['p'] ;
+			$v['p'] = $points ;
 
 			array_push($validated_data, $v);
 
@@ -338,6 +347,110 @@ class PainDraw extends \ExternalModules\AbstractExternalModule {
 
 		return $validated_data ;
 
+	}
+
+	/**
+	 * Version of the module as x.y.z, taken from the module directory name
+	 * (paindraw_v1.0.0 gives 1.0.0). REDCap requires that name, so it is the version REDCap
+	 * itself regards as installed. A two part version (paindraw_v1.0) becomes 1.0.0, because
+	 * the data format requires three parts.
+	 *
+	 * @throws \ValidationException
+	 */
+	protected function parseModuleVersion(string $directoryName): string {
+
+		if( preg_match('/_v([0-9]+)\.([0-9]+)(?:\.([0-9]+))?$/D', $directoryName, $m) !== 1 ) {
+			throw new \ValidationException("Cannot read the module version from the directory name '{$directoryName}'.") ;
+		}
+
+		return $m[1] . '.' . $m[2] . '.' . ( $m[3] ?? '0' ) ;
+	}
+
+	/**
+	 * A stroke as validateJsonInput() returns it (the names the browser uses), written with
+	 * the names of the data format.
+	 */
+	protected function toSchemaStroke(array $stroke): array {
+
+		return [
+			'stroke_id' => $stroke['strokeId'],
+			'draw_input_type' => $stroke['drawInputType'],
+			'tool' => $stroke['tool'],
+			'color' => $stroke['color'],
+			'line_width' => $stroke['lineWidth'],
+			'spray_density' => $stroke['sprayDensity'],
+			'spray_radius' => $stroke['sprayRadius'],
+			'alpha' => $stroke['alpha'],
+			'scale_factor' => $stroke['scaleFactor'],
+			'device_pixel_ratio' => $stroke['dpr'],
+			'points' => $stroke['p'],
+		] ;
+	}
+
+	/**
+	 * The drawing as it is stored in the canvas field: JSON schema 1.0.
+	 *
+	 * @param array $strokes strokes returned by validateJsonInput()
+	 * @throws \ValidationException
+	 */
+	protected function buildDrawingDocument(string $drawingId, array $cfg, array $strokes): array {
+
+		return [
+			'schema_version' => self::SCHEMA_VERSION,
+			'module_version' => $this->parseModuleVersion($this->getModuleDirectoryName()),
+			'app' => self::APP_NAME,
+			'drawing_id' => $drawingId,
+			'timestamp' => gmdate("Y-m-d\TH:i:s\Z"),
+			'width' => $cfg['canvas_width'] ?? null,
+			'height' => $cfg['canvas_height'] ?? null,
+			'units' => 'px',
+			'template_file' => $cfg['tpl'] ?? null,
+			'template_md5' => $cfg['tpl_md5'] ?? null,
+			'strokes' => array_map([$this, 'toSchemaStroke'], $strokes),
+		] ;
+	}
+
+	/**
+	 * Checks the header of a drawing against schema/paindraw_schema_1.0.json, so a file that
+	 * does not follow the schema is never stored. The strokes are checked by validateJsonInput(),
+	 * which is at least as strict as the schema, except for the rule the schema leaves to the
+	 * writer: stroke_id must be unique within a drawing.
+	 *
+	 * @throws \ValidationException
+	 */
+	protected function validateDrawingDocument(array $doc): void {
+
+		$problems = [] ;
+		$check = static function (bool $ok, string $problem) use (&$problems): void {
+			if( ! $ok ) {
+				$problems[] = $problem ;
+			}
+		};
+		$text = static fn($value): bool => is_string($value) && $value !== '' ;
+		$positiveInt = static fn($value): bool => is_int($value) && $value >= 1 ;
+
+		$check( ($doc['schema_version'] ?? null) === self::SCHEMA_VERSION, 'schema_version' ) ;
+		$check( preg_match('/^[0-9]+\.[0-9]+\.[0-9]+$/D', (string) ( $doc['module_version'] ?? '' ) ) === 1, 'module_version' ) ;
+		$check( $text($doc['app'] ?? null), 'app' ) ;
+		$check( $text($doc['drawing_id'] ?? null), 'drawing_id' ) ;
+		$check( preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?(Z|[+-][0-9]{2}:?[0-9]{2})?$/D', (string) ( $doc['timestamp'] ?? '' ) ) === 1, 'timestamp' ) ;
+		$check( $positiveInt($doc['width'] ?? null), 'width (canvas width in px)' ) ;
+		$check( $positiveInt($doc['height'] ?? null), 'height (canvas height in px)' ) ;
+		$check( ($doc['units'] ?? null) === 'px', 'units' ) ;
+		$check( $text($doc['template_file'] ?? null), 'template_file (background image name)' ) ;
+		$check( preg_match('/^[0-9a-f]{32}$/D', (string) ( $doc['template_md5'] ?? '' ) ) === 1, 'template_md5 (background image checksum)' ) ;
+
+		$strokes = $doc['strokes'] ?? null ;
+		$check( is_array($strokes) && $strokes === array_values($strokes), 'strokes' ) ;
+
+		if( is_array($strokes) ) {
+			$ids = array_column($strokes, 'stroke_id') ;
+			$check( count($ids) === count(array_unique($ids)), 'stroke_id must be unique within a drawing' ) ;
+		}
+
+		if( $problems ) {
+			throw new \ValidationException('Invalid: ' . implode(', ', $problems) . '.') ;
+		}
 	}
 
 	protected function includeJs($file) {

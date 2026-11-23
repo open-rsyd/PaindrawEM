@@ -4,7 +4,7 @@
  *
  * tests/fixtures/stroke-contract.json and tests/fixtures/strokes/*.json are
  * shared with the PHP tests (tests/php/ContractTest.php). The contract says
- * what PainDraw::validateJsonInput() accepts; these tests check that
+ * what PaindrawEM::validateJsonInput() accepts; these tests check that
  * paindraw.js only ever produces strokes that satisfy it.
  */
 import { afterEach, describe, expect, it } from 'vitest';
@@ -36,6 +36,7 @@ function checkStroke(stroke) {
     if (typeof value === 'number') {
       if (rule.min !== undefined && value < rule.min) errors.push(`${key}: below ${rule.min}`);
       if (rule.max !== undefined && value > rule.max) errors.push(`${key}: above ${rule.max}`);
+      if (rule.exclusiveMin !== undefined && value <= rule.exclusiveMin) errors.push(`${key}: not above ${rule.exclusiveMin}`);
       if (rule.maxDecimals !== undefined && (String(value).split('.')[1] ?? '').length > rule.maxDecimals) {
         errors.push(`${key}: more than ${rule.maxDecimals} decimals`);
       }

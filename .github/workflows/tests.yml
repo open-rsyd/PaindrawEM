@@ -37,3 +37,17 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm install --no-audit --no-fund
       - run: npm test
+
+  config:
+    name: config.json has no version number
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail if config.json contains a version number
+        # The version comes from the module directory name (set by the release tag),
+        # so it must not be repeated in the code base. History lives in GitHub releases.
+        run: |
+          php -r '$c = json_decode(file_get_contents("config.json"), true, 512, JSON_THROW_ON_ERROR);
+                  foreach (["version", "versions"] as $k) {
+                      if (array_key_exists($k, $c)) { fwrite(STDERR, "config.json must not contain \"$k\"\n"); exit(1); }
+                  }'

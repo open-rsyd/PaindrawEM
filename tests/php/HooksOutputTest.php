@@ -1,9 +1,9 @@
 <?php
 
-namespace OPEN\PainDraw\Tests;
+namespace OPEN\PaindrawEM\Tests;
 
-use OPEN\PainDraw\Tests\Support\PainDrawTestCase;
-use OPEN\PainDraw\Tests\Support\TestablePainDraw;
+use OPEN\PaindrawEM\Tests\Support\PainDrawTestCase;
+use OPEN\PaindrawEM\Tests\Support\TestablePainDraw;
 
 /**
  * What redcap_data_entry_form() and redcap_survey_page() print into the page.
@@ -46,7 +46,7 @@ class HooksOutputTest extends PainDrawTestCase
         $this->assertStringNotContainsString('&s=', $cfg['img_url']);
 
         $this->assertStringContainsString(
-            '<script src="https://example.test/modules/paindraw_v0.3/js/paindraw.js"></script>',
+            '<script src="https://example.test/modules/paindraw_v1.0.0/js/paindraw.js"></script>',
             $html
         );
         $this->assertStringContainsString('paindraw = ExternalModules.Modules.PainDraw', $html);

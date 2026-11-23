@@ -1,6 +1,6 @@
 <?php
 
-namespace OPEN\PainDraw\Tests\Support;
+namespace OPEN\PaindrawEM\Tests\Support;
 
 use PHPUnit\Framework\TestCase;
 

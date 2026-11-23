@@ -5,7 +5,7 @@ namespace ExternalModules;
 /**
  * Minimal stand-in for REDCap's AbstractExternalModule.
  *
- * Only the methods PainDraw.php uses are implemented. Public "fake*" and
+ * Only the methods PaindrawEM.php uses are implemented. Public "fake*" and
  * "saved*" properties let tests feed settings in and read results out.
  */
 abstract class AbstractExternalModule
@@ -23,6 +23,9 @@ abstract class AbstractExternalModule
     public array $transferredTranslations = [];
 
     public bool $jsModuleInitialised = false;
+
+    /** Name of the module directory, from which the module takes its version. */
+    public string $directoryName = 'paindraw_v1.0.0';
 
     public object $framework;
 
@@ -53,12 +56,12 @@ abstract class AbstractExternalModule
 
     public function getUrl($path)
     {
-        return 'https://example.test/modules/paindraw_v0.3/' . $path;
+        return 'https://example.test/modules/' . $this->directoryName . '/' . $path;
     }
 
     public function getModuleDirectoryName()
     {
-        return 'paindraw_v0.3';
+        return $this->directoryName;
     }
 
     public function initializeJavascriptModuleObject()
