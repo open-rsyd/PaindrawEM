@@ -1,6 +1,6 @@
 <?php
 
-namespace OPEN\PainDraw\Tests\Support;
+namespace OPEN\PaindrawEM\Tests\Support;
 
 /**
  * A small JSON Schema (draft 2020-12) validator: only the keywords that

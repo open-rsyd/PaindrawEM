@@ -1,11 +1,11 @@
 <?php
 
-namespace OPEN\PainDraw ;
+namespace OPEN\PaindrawEM ;
 
 use REDCap ;
 use Files ;
 
-class PainDraw extends \ExternalModules\AbstractExternalModule {
+class PaindrawEM extends \ExternalModules\AbstractExternalModule {
     
 	private ?string $_survey_hash=Null ;
 

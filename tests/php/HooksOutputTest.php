@@ -1,9 +1,9 @@
 <?php
 
-namespace OPEN\PainDraw\Tests;
+namespace OPEN\PaindrawEM\Tests;
 
-use OPEN\PainDraw\Tests\Support\PainDrawTestCase;
-use OPEN\PainDraw\Tests\Support\TestablePainDraw;
+use OPEN\PaindrawEM\Tests\Support\PainDrawTestCase;
+use OPEN\PaindrawEM\Tests\Support\TestablePainDraw;
 
 /**
  * What redcap_data_entry_form() and redcap_survey_page() print into the page.

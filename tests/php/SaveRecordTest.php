@@ -1,9 +1,9 @@
 <?php
 
-namespace OPEN\PainDraw\Tests;
+namespace OPEN\PaindrawEM\Tests;
 
-use OPEN\PainDraw\Tests\Support\PainDrawTestCase;
-use OPEN\PainDraw\Tests\Support\TestImages;
+use OPEN\PaindrawEM\Tests\Support\PainDrawTestCase;
+use OPEN\PaindrawEM\Tests\Support\TestImages;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;

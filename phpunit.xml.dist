@@ -14,7 +14,7 @@
     </testsuites>
     <source>
         <include>
-            <file>PainDraw.php</file>
+            <file>PaindrawEM.php</file>
         </include>
     </source>
 </phpunit>

@@ -5,7 +5,7 @@ namespace ExternalModules;
 /**
  * Minimal stand-in for REDCap's AbstractExternalModule.
  *
- * Only the methods PainDraw.php uses are implemented. Public "fake*" and
+ * Only the methods PaindrawEM.php uses are implemented. Public "fake*" and
  * "saved*" properties let tests feed settings in and read results out.
  */
 abstract class AbstractExternalModule

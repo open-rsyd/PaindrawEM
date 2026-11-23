@@ -2,7 +2,7 @@
  * Test harness for js/paindraw.js.
  *
  * paindraw.js is a classic script: it has no exports and expects REDCap to
- * have defined the globals `paindraw_cfg` (printed by PainDraw.php) and
+ * have defined the globals `paindraw_cfg` (printed by PaindrawEM.php) and
  * `paindraw` (the module's JavaScript object). The harness builds a REDCap-like
  * data entry form, defines those globals, replaces the browser features jsdom
  * does not implement (canvas 2D context, image loading, layout) and then runs
@@ -24,7 +24,7 @@ export const SNAPSHOT = { snapshot: true };
 
 const TRANSLATIONS = { reset_btn: 'Reset', download_btn: 'Download copy' };
 
-/** Settings as PainDraw.php::parseModuleSettings() would hand them to the script. */
+/** Settings as PaindrawEM.php::parseModuleSettings() would hand them to the script. */
 export const DEFAULT_CFG = Object.freeze({
   canvas_field: 'pain_draw',
   img_url: '/redcap/DataEntry/image_view.php?doc_id_hash=abc&pid=7&id=42',

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * PainDraw.php throws and catches \ValidationException in the global namespace.
+ * PaindrawEM.php throws and catches \ValidationException in the global namespace.
  *
  * NOTE: this stub makes the tests independent of REDCap. Please verify that a
  * global \ValidationException class really exists in the REDCap versions you

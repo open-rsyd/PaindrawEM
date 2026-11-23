@@ -1,9 +1,9 @@
 <?php
 
-namespace OPEN\PainDraw\Tests;
+namespace OPEN\PaindrawEM\Tests;
 
-use OPEN\PainDraw\Tests\Support\JsonSchemaSubset;
-use OPEN\PainDraw\Tests\Support\PainDrawTestCase;
+use OPEN\PaindrawEM\Tests\Support\JsonSchemaSubset;
+use OPEN\PaindrawEM\Tests\Support\PainDrawTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 /**

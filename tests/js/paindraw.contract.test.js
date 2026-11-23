@@ -4,7 +4,7 @@
  *
  * tests/fixtures/stroke-contract.json and tests/fixtures/strokes/*.json are
  * shared with the PHP tests (tests/php/ContractTest.php). The contract says
- * what PainDraw::validateJsonInput() accepts; these tests check that
+ * what PaindrawEM::validateJsonInput() accepts; these tests check that
  * paindraw.js only ever produces strokes that satisfy it.
  */
 import { afterEach, describe, expect, it } from 'vitest';

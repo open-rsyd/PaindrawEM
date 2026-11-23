@@ -1,8 +1,8 @@
 <?php
 
-namespace OPEN\PainDraw\Tests;
+namespace OPEN\PaindrawEM\Tests;
 
-use OPEN\PainDraw\Tests\Support\PainDrawTestCase;
+use OPEN\PaindrawEM\Tests\Support\PainDrawTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -201,7 +201,7 @@ class ValidateJsonInputTest extends PainDrawTestCase
     // --------------------------------------------------------- regression tests for fixed bugs
 
     /**
-     * PainDraw.php line ~342 checks $d['scaleFactor'] instead of $d['dpr'], so
+     * PaindrawEM.php line ~342 checks $d['scaleFactor'] instead of $d['dpr'], so
      * the dpr value is never validated.
      */
     public function testDprIsValidatedOnItsOwnValue(): void
