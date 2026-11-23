@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, drawStroke, loadPainDraw, mouse, TEST_PNG, touch } from './helpers.js';
+import { cleanup, drawStroke, loadPainDraw, mouse, SNAPSHOT, TEST_PNG, touch } from './helpers.js';
 
 afterEach(cleanup);
 
@@ -90,20 +90,10 @@ describe('spray tool', () => {
 });
 
 describe('pen tool', () => {
-  it('draws a continuous line and records the points', async () => {
+  it('records the stroke with its settings and every sampled point', async () => {
     const env = await loadReady({ draw_tool: 'pen', line_width: 6, line_color: '#00aaff', alpha: 0.5 });
 
     drawStroke(env, [[60, 70], [70, 70], [70, 80]]);
-
-    expect(env.ctx.beginPath).toHaveBeenCalledTimes(1);
-    expect(env.ctx.moveTo).toHaveBeenCalledWith(100, 100);
-    expect(env.ctx.lineTo).toHaveBeenCalledTimes(3);
-    expect(env.ctx.lineTo).toHaveBeenLastCalledWith(120, 120);
-    expect(env.ctx.closePath).toHaveBeenCalledTimes(1);
-    expect(env.ctx.lineWidth).toBe(6);
-    expect(env.ctx.strokeStyle).toBe('#00aaff');
-    expect(env.ctx.globalAlpha).toBe(0.5);
-    expect(env.ctx.fillRect).not.toHaveBeenCalled();
 
     const [stroke] = env.strokes();
     expect(stroke.tool).toBe('pen');
@@ -111,6 +101,53 @@ describe('pen tool', () => {
     expect(stroke.lineWidth).toBe(6);
     expect(stroke.alpha).toBe(0.5);
     expect(stroke.p).toEqual([[100, 100], [120, 100], [120, 120]]);
+  });
+
+  it('draws with the configured line settings and never uses the spray', async () => {
+    const env = await loadReady({ draw_tool: 'pen', line_width: 6, line_color: '#00aaff', alpha: 0.5 });
+
+    drawStroke(env, [[60, 70], [70, 70]]);
+
+    expect(env.ctx.lineWidth).toBe(6);
+    expect(env.ctx.strokeStyle).toBe('#00aaff');
+    expect(env.ctx.globalAlpha).toBe(0.5);
+    expect(env.ctx.fillRect).not.toHaveBeenCalled();
+  });
+
+  // The pen used to stroke the growing path again on every move, which painted the
+  // first segments over and over so transparency stacked up (fix in PR #2).
+  it('restores the canvas from a snapshot and draws the whole stroke once on every move', async () => {
+    const env = await loadReady({ draw_tool: 'pen', alpha: 0.5 });
+
+    drawStroke(env, [[60, 70], [70, 70], [70, 80]]);
+
+    expect(env.ctx.getImageData).toHaveBeenCalledTimes(1);
+    expect(env.ctx.getImageData).toHaveBeenCalledWith(0, 0, 400, 300);
+    expect(env.ctx.putImageData).toHaveBeenCalledTimes(3);
+    expect(env.ctx.putImageData).toHaveBeenCalledWith(SNAPSHOT, 0, 0);
+    expect(env.ctx.beginPath).toHaveBeenCalledTimes(3);
+    expect(env.ctx.stroke).toHaveBeenCalledTimes(3);
+    // The last redraw holds the complete stroke: it starts at the first point and visits all three.
+    expect(env.ctx.moveTo.mock.calls.at(-1)).toEqual([100, 100]);
+    expect(env.ctx.lineTo.mock.calls.slice(-3)).toEqual([[100, 100], [120, 100], [120, 120]]);
+  });
+
+  it('takes a new snapshot for every stroke', async () => {
+    const env = await loadReady({ draw_tool: 'pen' });
+
+    drawStroke(env, [[60, 70], [70, 70]]);
+    drawStroke(env, [[80, 90]]);
+
+    expect(env.ctx.getImageData).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not take a snapshot for the spray', async () => {
+    const env = await loadReady({ draw_tool: 'spray' });
+
+    drawStroke(env, [[60, 70], [70, 70]]);
+
+    expect(env.ctx.getImageData).not.toHaveBeenCalled();
+    expect(env.ctx.putImageData).not.toHaveBeenCalled();
   });
 });
 

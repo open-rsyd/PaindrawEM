@@ -19,6 +19,9 @@ const SCRIPT_SOURCE = fs.readFileSync(path.join(ROOT, 'js/paindraw.js'), 'utf8')
 
 export const TEST_PNG = 'data:image/png;base64,TESTPNG';
 
+/** What the mocked canvas returns from getImageData(), so tests can see it being put back. */
+export const SNAPSHOT = { snapshot: true };
+
 const TRANSLATIONS = { reset_btn: 'Reset', download_btn: 'Download copy' };
 
 /** Settings as PainDraw.php::parseModuleSettings() would hand them to the script. */
@@ -69,6 +72,8 @@ function makeContextMock() {
     lineJoin: '',
     clearRect: vi.fn(),
     drawImage: vi.fn(),
+    getImageData: vi.fn(() => SNAPSHOT),
+    putImageData: vi.fn(),
     fillRect: vi.fn(),
     beginPath: vi.fn(),
     moveTo: vi.fn(),
