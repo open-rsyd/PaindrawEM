@@ -1,0 +1,15 @@
+[
+  {
+    "strokeId": 1,
+    "drawInputType": "touch",
+    "tool": "pen",
+    "color": "#00AAff",
+    "lineWidth": 6,
+    "sprayDensity": 15,
+    "sprayRadius": 5,
+    "alpha": 0.75,
+    "scaleFactor": 1,
+    "dpr": 1.5,
+    "p": [[100, 200], [101, 203]]
+  }
+]

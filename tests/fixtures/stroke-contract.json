@@ -1,0 +1,29 @@
+{
+  "description": "Contract between paindraw.js (producer) and PainDraw::validateJsonInput() (consumer). Both test suites read this file, so a change on one side that is not mirrored on the other fails a test.",
+  "strokeKeys": [
+    "strokeId",
+    "drawInputType",
+    "tool",
+    "color",
+    "lineWidth",
+    "sprayDensity",
+    "sprayRadius",
+    "alpha",
+    "scaleFactor",
+    "dpr",
+    "p"
+  ],
+  "rules": {
+    "strokeId":      { "type": "integer", "min": 0 },
+    "drawInputType": { "enum": ["mouse", "touch"] },
+    "tool":          { "enum": ["spray", "pen"] },
+    "color":         { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "lineWidth":     { "type": "integer", "min": 0 },
+    "sprayDensity":  { "type": "integer", "min": 0, "requiredWhen": { "tool": "spray" } },
+    "sprayRadius":   { "type": "integer", "min": 0, "requiredWhen": { "tool": "spray" } },
+    "alpha":         { "type": "number", "min": 0, "max": 1, "maxDecimals": 2 },
+    "scaleFactor":   { "type": "number", "min": 0 },
+    "dpr":           { "type": "number", "min": 0 },
+    "p":             { "type": "points", "minItems": 1 }
+  }
+}

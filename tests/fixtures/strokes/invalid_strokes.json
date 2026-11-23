@@ -1,0 +1,50 @@
+[
+  {
+    "name": "three-digit hex colour",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "spray", "color": "#fc0", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "alpha": 0.1, "scaleFactor": 1, "dpr": 1, "p": [[1, 2]] }]
+  },
+  {
+    "name": "unknown tool",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "brush", "color": "#fc3d03", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "alpha": 0.1, "scaleFactor": 1, "dpr": 1, "p": [[1, 2]] }]
+  },
+  {
+    "name": "unknown input type",
+    "strokes": [{ "strokeId": 1, "drawInputType": "stylus", "tool": "pen", "color": "#fc3d03", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "alpha": 0.1, "scaleFactor": 1, "dpr": 1, "p": [[1, 2]] }]
+  },
+  {
+    "name": "missing alpha",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "pen", "color": "#fc3d03", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "scaleFactor": 1, "dpr": 1, "p": [[1, 2]] }]
+  },
+  {
+    "name": "alpha above one",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "pen", "color": "#fc3d03", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "alpha": 1.5, "scaleFactor": 1, "dpr": 1, "p": [[1, 2]] }]
+  },
+  {
+    "name": "alpha with three decimals",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "pen", "color": "#fc3d03", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "alpha": 0.123, "scaleFactor": 1, "dpr": 1, "p": [[1, 2]] }]
+  },
+  {
+    "name": "fractional coordinates",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "pen", "color": "#fc3d03", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "alpha": 0.1, "scaleFactor": 1, "dpr": 1, "p": [[1.5, 2]] }]
+  },
+  {
+    "name": "point with three values",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "pen", "color": "#fc3d03", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "alpha": 0.1, "scaleFactor": 1, "dpr": 1, "p": [[1, 2, 3]] }]
+  },
+  {
+    "name": "empty point list",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "pen", "color": "#fc3d03", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "alpha": 0.1, "scaleFactor": 1, "dpr": 1, "p": [] }]
+  },
+  {
+    "name": "spray without sprayDensity",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "spray", "color": "#fc3d03", "lineWidth": 3, "sprayRadius": 5, "alpha": 0.1, "scaleFactor": 1, "dpr": 1, "p": [[1, 2]] }]
+  },
+  {
+    "name": "negative line width",
+    "strokes": [{ "strokeId": 1, "drawInputType": "mouse", "tool": "pen", "color": "#fc3d03", "lineWidth": -1, "sprayDensity": 15, "sprayRadius": 5, "alpha": 0.1, "scaleFactor": 1, "dpr": 1, "p": [[1, 2]] }]
+  },
+  {
+    "name": "negative stroke id",
+    "strokes": [{ "strokeId": -1, "drawInputType": "mouse", "tool": "pen", "color": "#fc3d03", "lineWidth": 3, "sprayDensity": 15, "sprayRadius": 5, "alpha": 0.1, "scaleFactor": 1, "dpr": 1, "p": [[1, 2]] }]
+  }
+]
